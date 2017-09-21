@@ -12,8 +12,8 @@ Vagrant.configure("2") do |config|
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://atlas.hashicorp.com/search.
-  config.vm.box = "CentOS7.0"
-
+  # boxがなければ追加しておくこと
+  config.vm.box = "CentOS7.1"
   # シェルスクリプトの追加
   config.vm.provision :shell, :path => "provision.sh"
 
@@ -29,8 +29,10 @@ Vagrant.configure("2") do |config|
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
-  # 外からWebサイトが見れるようにコメントを外す
-   config.vm.network "private_network", ip: "192.168.33.10"
+  config.vm.network "private_network", ip: "192.168.33.10"
+  # private ipが解除される不具合？対応
+  # https://qiita.com/junqiq/items/a19d3ea48b072a1b28d3
+  config.vm.provision "shell", run: "always", inline: "systemctl restart network.service"
 
   # Create a public network, which generally matched to bridged network.
   # Bridged networks make the machine appear as another physical device on
