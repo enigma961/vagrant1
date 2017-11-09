@@ -1,56 +1,75 @@
 
-#VIMのインストール
+# install vim 
 sudo yum -y install vim
 
-#httpdのインストール
+# install apache
 sudo yum -y install httpd
-#httpdのスタート（Apacheサーバ起動）
+# start apache
 sudo systemctl start httpd
-#Apacheサーバの自動起動
+# add apache to the not  auto start
 sudo systemctl enable httpd
 
-
-#ファイヤーウォールの停止
+# stop firewall
 sudo systemctl stop firewalld
-#ファイヤーウォールをOS起動時に自動停止させる
+# add firewall to the not  auto start
 sudo systemctl disable firewalld
 
-#Webで表示するフォルダを削除
+# set vagrant share folder
 sudo rm -rf /var/www/html
-#Webで表示するフォルダを．共有フォルダである/vagrantとシンボリックリンク
 sudo ln -fs /vagrant /var/www/html
 
 
-#index.htmlのファイルの作成
+# add index.htm
 cd /vagrant
 touch index.html
 echo "<!DOCTYPE html><html><head><meta charset='utf-8'><title>test</title></head><body>Hello World</body></html>" > index.html
 
 
-#Epelリポジトリの追加
+# install Epel
 sudo yum -y install epel-release
-#Remiリポジトリの追加
+# install Remi
 wget http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
 sudo rpm -ivh ./remi-release-7.rpm
 
-
-#phpのインストール
+# install php
 sudo yum -y --enablerepo=remi-php70,remi install php php-mcrypt php-mbstring php-fpm php-gd php-xml php-pdo php-mysqlnd php-devel
 
-
-#MariaDBの削除(MySQLと競合を起こすため)
+# remove MariaDB
 sudo yum -y remove mariadb-libs
 
+# MySQL
+    #MySQLのインストール(http://dev.mysql.com/downloads/repo/yum/)
+    #sudo yum -y install http://dev.mysql.com/get/mysql57-community-release-el6-7.noarch.rpm
+    #sudo yum -y install mysql-community-server
 
-#MySQLのインストール(http://dev.mysql.com/downloads/repo/yum/)
-sudo yum -y install http://dev.mysql.com/get/mysql57-community-release-el6-7.noarch.rpm
-sudo yum -y install mysql-community-server
+
+# add the mysql yum repo
+yum -y localinstall http://dev.mysql.com/get/mysql57-community-release-el7-7.noarch.rpm
+# install mysql server
+yum -y install mysql-community-server
+# start the mysql service
+systemctl start mysqld
+# add mysql to the auto start
+systemctl enable mysqld
+
+PASSWORD=$(grep 'temporary password' /var/log/mysqld.log | sed 's/.* //g')
+
+echo "Root password: ${PASSWORD}"
+
+# Update password so it's not expired; remove password validator plugin, remove password
+mysql -p"${PASSWORD}" --connect-expired-password -e \
+ "ALTER USER USER() IDENTIFIED BY '@JCQZQBgZwY4S0e*KbxU'; UNINSTALL PLUGIN validate_password; ALTER USER USER() IDENTIFIED BY '';" || \
+ echo "NOTICE: unable to update password, maybe this has been done before"
+systemctl restart mysqld
+
+echo "MySQL installed"
 
 
-#Composerのインストール
+#Composer install
 curl -sS https://getcomposer.org/installer | php
 sudo mv composer.phar /usr/local/bin/composer
 
 
-#gitのインストール
+#git install
 sudo yum -y install git
+
